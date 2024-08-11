@@ -3,7 +3,7 @@ import Search from "../assets/search";
 
 const ChatOptions = () => {
     return (
-        <div className={"flex flex-row items-center justify-between p-2 gap-2"}>
+        <div className={"flex flex-row items-center justify-between p-2 gap-2 border-b border-[#666666]"}>
             <label className="input input-bordered flex items-center gap-2 bg-transparent border-[#666666] border p-2 placeholder-[#666666] text-white h-10">
                 <input type="text" className="w-full" placeholder={"Search"}/>
                 <Search/>
