@@ -2,7 +2,7 @@ import React from 'react';
 
 const ProfilePreview = ({username, status, onStatusChange}) => {
     return (
-        <div className={"flex flex-row items-center justify-between p-2"}>
+        <div className={"flex flex-row items-center justify-between p-2 gap-2"}>
             <div className={"w-10 h-10 bg-[#1db954] rounded-full"}/>
             <div className={"flex flex-col"}>
                 <span className={"text-white font-bold"}>{username}</span>
@@ -27,7 +27,7 @@ const ProfilePreview = ({username, status, onStatusChange}) => {
                         <span className="block w-1 h-1 bg-white rounded-full"></span>
                     </div>
                 </div>
-                <ul tabIndex="0" className="dropdown-content menu bg-[#212121] rounded-box z-[1] w-52 p-2 shadow">
+                <ul tabIndex="0" className="dropdown-content menu bg-[#212121] rounded-box z-[1] w-fit p-2 shadow">
                     <li><a>Log Out</a></li>
                     <li><a>Delete Account</a></li>
                 </ul>
