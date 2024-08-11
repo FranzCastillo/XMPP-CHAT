@@ -3,34 +3,44 @@ import { client, xml } from "@xmpp/client/browser";
 class Client {
     constructor() {
         if (!Client.instance) {
-            this.xmpp = null;
+            this.xmpp = client({
+                service: "ws://alumchat.lol:7070/ws/",
+                domain: "alumchat.lol",
+                username: "",
+                password: "",
+            });
             Client.instance = this;
         }
         return Client.instance;
     }
 
-    _setupClient() {
-        this.xmpp.on("error", this.onError.bind(this));
-        this.xmpp.on("offline", this.onOffline.bind(this));
-        this.xmpp.on("stanza", this.onStanza.bind(this));
-        this.xmpp.on("online", this.onOnline.bind(this));
+    _setupClient(doNavigation) {
+        try {
+            this.xmpp.on("error", this.onError.bind(this));
+            this.xmpp.on("offline", this.onOffline.bind(this));
+            this.xmpp.on("stanza", this.onStanza.bind(this));
+            this.xmpp.on("online", (address) => this.onOnline(address, doNavigation));
 
-        this.xmpp.start().catch(console.error);
+            this.xmpp.start();
+        } catch (err) {
+            this.onError(err);
+        }
     }
 
-    login(username, password) {
+    login(username, password, doNavigation) {
         this.xmpp = client({
-            service: import.meta.env.VITE_SERVICE,
-            domain: import.meta.env.VITE_DOMAIN,
-            username: username,
-            password: password,
+            service: "ws://alumchat.lol:7070/ws/",
+            domain: "alumchat.lol",
+            username,
+            password,
         });
 
-        this._setupClient();
+        this._setupClient(doNavigation);
     }
 
     onError(err) {
         console.error(err);
+        this.xmpp.stop();
     }
 
     onOffline() {
@@ -38,17 +48,16 @@ class Client {
     }
 
     onStanza(stanza) {
-        console.log("stanza", stanza.toString());
+        console.log("STANZA\n", stanza.toString());
     }
 
-    async onOnline(address) {
+    async onOnline(address, doNavigation) {
+        if (doNavigation) {
+            doNavigation();
+        }
+
+        // Send presence
         await this.xmpp.send(xml("presence"));
-        const message = xml(
-            "message",
-            { type: "chat", to: address },
-            xml("body", {}, "hello world"),
-        );
-        await this.xmpp.send(message);
     }
 }
 
