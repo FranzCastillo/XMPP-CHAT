@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ProfilePreview = ({username, status, onStatusChange}) => {
+const ProfilePreview = ({username, status, onLogOut, onStatusChange, onAccDelete}) => {
     return (
         <div className={"flex flex-row justify-between p-2 border-t border-[#666666] w-full"}>
             <div className={"flex flex-col w-2/3"}>
@@ -27,8 +27,8 @@ const ProfilePreview = ({username, status, onStatusChange}) => {
                     </div>
                 </div>
                 <ul tabIndex="0" className="dropdown-content menu bg-[#212121] rounded-box z-[1] w-fit p-2 shadow">
-                    <li><a>Log Out</a></li>
-                    <li><a>Delete Account</a></li>
+                    <li><a onClick={onLogOut}>Log Out</a></li>
+                    <li><a onClick={onAccDelete}>Delete Account</a></li>
                 </ul>
             </div>
         </div>

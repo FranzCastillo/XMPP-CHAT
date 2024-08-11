@@ -3,12 +3,9 @@ import { client, xml } from "@xmpp/client/browser";
 class Client {
     constructor() {
         if (!Client.instance) {
-            this.xmpp = client({
-                service: "ws://alumchat.lol:7070/ws/",
-                domain: "alumchat.lol",
-                username: "",
-                password: "",
-            });
+            this.xmpp = null;
+            this.username = null;
+            this.password = null;
             Client.instance = this;
         }
         return Client.instance;
@@ -28,6 +25,8 @@ class Client {
     }
 
     login(username, password, doNavigation) {
+        this.username = username;
+        this.password = password;
         this.xmpp = client({
             service: "ws://alumchat.lol:7070/ws/",
             domain: "alumchat.lol",
@@ -36,6 +35,17 @@ class Client {
         });
 
         this._setupClient(doNavigation);
+    }
+
+    async logout(doNavigation) {
+        if (this.xmpp) {
+            // Send unavailable presence to indicate logout
+            await this.xmpp.send(xml("presence", { type: "unavailable" }));
+            this.xmpp.stop();
+            this.xmpp = null;
+
+            doNavigation();
+        }
     }
 
     onError(err) {
