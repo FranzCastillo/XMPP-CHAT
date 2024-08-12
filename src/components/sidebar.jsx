@@ -29,9 +29,8 @@ const Sidebar = ({messages}) => {
             </div>}
             <ProfilePreview
                 username={Client.username}
-                status={"Online"}  // TODO: Get status from XMPP client
                 onLogOut={() => Client.logout(doNavigationLogOut)}
-                onStatusChange={(status) => console.log(status)}  // TODO: Implement status change
+                onStatusChange={(status) => Client.changePresence(status)}
                 onAccDelete={() => console.log("Deleting account")}  // TODO: Implement account deletion
             />
         </div>

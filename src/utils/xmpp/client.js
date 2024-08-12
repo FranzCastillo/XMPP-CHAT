@@ -3,9 +3,10 @@ import { client, xml } from "@xmpp/client/browser";
 class Client {
     constructor() {
         if (!Client.instance) {
-            this.xmpp = null;
-            this.username = null;
-            this.password = null;
+            this.xmpp = "ws://alumchat.lol:7070/ws/";
+            this.domain = "alumchat.lol";
+            this.username = "cas21562";
+            this.password = "cas21562";
             Client.instance = this;
         }
         return Client.instance;
@@ -45,6 +46,13 @@ class Client {
             this.xmpp = null;
 
             doNavigation();
+        }
+    }
+
+    async changePresence(status) {
+        console.log("Set status to", status);
+        if (this.xmpp) {
+            await this.xmpp.send(xml("presence", {}, xml("status", {}, status)));
         }
     }
 

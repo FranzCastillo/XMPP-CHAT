@@ -1,6 +1,11 @@
-import React from 'react';
+import React, {useState} from 'react';
 
-const ProfilePreview = ({username, status, onLogOut, onStatusChange, onAccDelete}) => {
+const ProfilePreview = ({username, onLogOut, onStatusChange, onAccDelete}) => {
+    const [status, setStatus] = useState("Online")
+    const handleStatusChange = (status) => {
+        setStatus(status)
+        onStatusChange(status)
+    }
     return (
         <div className={"flex flex-row justify-between p-2 border-t border-[#666666] w-full"}>
             <div className={"flex flex-col w-2/3"}>
@@ -8,7 +13,7 @@ const ProfilePreview = ({username, status, onLogOut, onStatusChange, onAccDelete
                 <select
                     className={"bg-transparent text-[#b3b3b3] border-none outline-none cursor-pointer"}
                     value={status}
-                    onChange={(e) => onStatusChange(e.target.value)}
+                    onChange={(e) => handleStatusChange(e.target.value)}
                 >
                     <option value="Online" className={"bg-[#212121] hover:bg-[#333333]"}>Online</option>
                     <option value="Not Available" className={"bg-[#212121] hover:bg-[#333333]"}>Not Available</option>
