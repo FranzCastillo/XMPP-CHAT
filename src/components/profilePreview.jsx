@@ -1,4 +1,6 @@
 import React, {useState} from 'react';
+import Menu from "../assets/menu";
+import User from "../assets/user";
 
 const ProfilePreview = ({username, onLogOut, onStatusChange, onAccDelete}) => {
     const [status, setStatus] = useState("Online")
@@ -8,28 +10,28 @@ const ProfilePreview = ({username, onLogOut, onStatusChange, onAccDelete}) => {
     }
     return (
         <div className={"flex flex-row justify-between p-2 border-t border-[#666666] w-full"}>
-            <div className={"flex flex-col w-2/3"}>
-                <span className={"text-white font-bold truncate"}>{username}</span>
-                <select
-                    className={"bg-transparent text-[#b3b3b3] border-none outline-none cursor-pointer"}
-                    value={status}
-                    onChange={(e) => handleStatusChange(e.target.value)}
-                >
-                    <option value="Online" className={"bg-[#212121] hover:bg-[#333333]"}>Online</option>
-                    <option value="Not Available" className={"bg-[#212121] hover:bg-[#333333]"}>Not Available</option>
-                    <option value="Away" className={"bg-[#212121] hover:bg-[#333333]"}>Away</option>
-                    <option value="Busy" className={"bg-[#212121] hover:bg-[#333333]"}>Busy</option>
-                    <option value="Offline" className={"bg-[#212121] hover:bg-[#333333]"}>Offline</option>
-                </select>
+            <div className={"flex flex-row items-center gap-2"}>
+                <User width={30} height={30} fill={"#666666"}/>
+                <div className={"flex flex-col"}>
+                    <span className={"text-white pl-1"}>{username}</span>
+                    <select
+                        className={"bg-transparent text-[#b3b3b3] shadow-accent cursor-pointer text-xs"}
+                        value={status}
+                        onChange={(e) => handleStatusChange(e.target.value)}
+                    >
+                        <option value="Online" className={"bg-[#212121] hover:bg-[#333333]"}>Online</option>
+                        <option value="Not Available" className={"bg-[#212121] hover:bg-[#333333]"}>Not Available
+                        </option>
+                        <option value="Away" className={"bg-[#212121] hover:bg-[#333333]"}>Away</option>
+                        <option value="Busy" className={"bg-[#212121] hover:bg-[#333333]"}>Busy</option>
+                        <option value="Offline" className={"bg-[#212121] hover:bg-[#333333]"}>Offline</option>
+                    </select>
+                </div>
             </div>
             <div className="dropdown dropdown-top align-end">
                 <div tabIndex="0" role="button"
                      className="btn m-1 bg-transparent border-none p-0 w-8 hover:bg-[#212121]">
-                    <div className="flex flex-col items-center justify-center gap-1">
-                        <span className="block w-1 h-1 bg-white rounded-full"></span>
-                        <span className="block w-1 h-1 bg-white rounded-full"></span>
-                        <span className="block w-1 h-1 bg-white rounded-full"></span>
-                    </div>
+                    <Menu/>
                 </div>
                 <ul tabIndex="0" className="dropdown-content menu bg-[#212121] rounded-box z-[1] w-fit p-2 shadow">
                     <li><a onClick={onLogOut}>Log Out</a></li>

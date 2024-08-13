@@ -92,6 +92,32 @@ class Client {
         }
     }
 
+    async removeContact(jid) {
+        if (this.xmpp) {
+            const removeRequest = xml(
+                "iq",
+                { type: "set", id: "remove_contact" },
+                xml("query", { xmlns: "jabber:iq:roster" },
+                    xml("item", { jid, subscription: "remove" })
+                )
+            );
+            await this.xmpp.send(removeRequest);
+        }
+    }
+
+    async addContact(jid) {
+        if (this.xmpp) {
+            const addRequest = xml(
+                "iq",
+                { type: "set", id: "add_contact" },
+                xml("query", { xmlns: "jabber:iq:roster" },
+                    xml("item", { jid, name: jid.split("@")[0] })
+                )
+            );
+            await this.xmpp.send(addRequest);
+        }
+    }
+
     setRosterUpdateCallback(callback) {
         this.rosterUpdateCallback = callback;
     }

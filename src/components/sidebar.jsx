@@ -26,6 +26,14 @@ const Sidebar = ({messages}) => {
 
     const doNavigationLogOut = () => navigate("/login");
 
+    const handleAddContactSubmit = (event) => {
+        event.preventDefault();
+        const username = event.target.elements.username.value;
+        const jid = `${username}@alumchat.lol`;
+        Client.addContact(jid);
+        document.getElementById('contact_modal').close();
+    };
+
     return (
         <div
             className={"w-1/6 h-screen bg-[#1c1c1c] border-r border-[#666666] flex flex-col justify-between min-w-[226px]"}>
@@ -34,7 +42,8 @@ const Sidebar = ({messages}) => {
                 <div className={"flex flex-row items-center justify-between p-2 gap-2 border-b border-[#666666]"}>
                     <label
                         className="input input-bordered flex items-center gap-2 bg-transparent border-[#666666] border p-2 placeholder-[#666666] text-white h-10">
-                        <input type="text" className="w-full" placeholder={"Search"} onChange={(e) => setSearch(e.target.value)}/>
+                        <input type="text" className="w-full" placeholder={"Search"}
+                               onChange={(e) => setSearch(e.target.value)}/>
                         <Search/>
                     </label>
                     <div className="dropdown">
@@ -45,10 +54,29 @@ const Sidebar = ({messages}) => {
                             className="dropdown-content menu bg-[#212121] rounded-box z-[1] w-40 p-2 shadow">
                             <li><a>Start Chat...</a></li>
                             <li><a>Create Group Chat...</a></li>
-                            <li><a>Add Contact...</a></li>
+                            <li>
+                                <a onClick={() => document.getElementById('contact_modal').showModal()}>Add
+                                    Contact...</a>
+                            </li>
                         </ul>
                     </div>
                 </div>
+                <dialog id="contact_modal" className="modal">
+                    <div className="modal-box">
+                        <h3 className="font-bold text-lg">Add Contact</h3>
+                        <p className="py-4">Who do you want to add?</p>
+                        <form method="dialog" onSubmit={handleAddContactSubmit}>
+                            <label className="form-label">Username</label>
+                            <input type="text" name="username" className="form-input" placeholder="Username"/>
+                            <div className="modal-action">
+                                <button type="submit" className="btn">Add</button>
+                                <button type="button" className="btn"
+                                        onClick={() => document.getElementById('contact_modal').close()}>Close
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </dialog>
             </div>
             <div className={"w-full h-full overflow-y-auto"}>
                 <div className={"flex items-center justify-between"}>
@@ -74,7 +102,7 @@ const Sidebar = ({messages}) => {
                     <div className={"flex items-center justify-center h-32"}>
                         <span className={"text-white"}>No contacts found</span>
                     </div>
-                
+
                 )}
             </div>
             <ProfilePreview
