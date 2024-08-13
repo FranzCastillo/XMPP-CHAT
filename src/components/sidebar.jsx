@@ -90,7 +90,7 @@ const Sidebar = ({messages}) => {
                     </button>
                 </div>
                 <hr className={"border-[#666666] w-full"}/>
-                <div>
+                <div className={"flex flex-col"}>
                     {filteredRoster.map((item, index) => {
                         item.name = item.jid.split("@")[0];
                         return (

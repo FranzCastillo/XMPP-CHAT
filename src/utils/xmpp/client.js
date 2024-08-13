@@ -105,6 +105,20 @@ class Client {
         }
     }
 
+    async getVCard(jid) {
+        if (this.xmpp) {
+            const vCardRequest = xml(
+                "iq",
+                {type: "get", id: "get_vcard"},
+                xml("vCard", {xmlns: "vcard-temp"},
+                    xml("FN")
+                )
+            );
+            await this.xmpp.send(vCardRequest);
+        }
+    }
+
+
     async addContact(jid) {
         if (this.xmpp) {
             const addRequest = xml(
