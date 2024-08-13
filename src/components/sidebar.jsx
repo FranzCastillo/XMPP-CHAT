@@ -1,32 +1,82 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import ProfilePreview from "./profilePreview";
-import ChatOptions from "./chatOptions";
-import ChatPreview from "./chatPreview";
 import Client from "../utils/xmpp/client";
 import {useNavigate} from "react-router-dom";
+import RosterPreview from "./RosterPreview";
+import Refresh from "../assets/refresh";
+import Search from "../assets/search";
 
 const Sidebar = ({messages}) => {
-    messages = [{username: "John Doe", message: "Hello"}, {username: "Jane Do243423342S324e", message: "Hiwerasdsadfadssasdasdasd"}]
-
     const navigate = useNavigate();
+    const [roster, setRoster] = useState([]);
+    useEffect(() => {
+        Client.setRosterUpdateCallback((updatedRoster) => {
+            console.log("Roster Updated:", updatedRoster);
+            setRoster(updatedRoster);
+        });
+        Client.getRoster();
+    }, []);
+
+    const [search, setSearch] = useState("");
+    const filteredRoster = roster.filter(item => {
+            item.name = item.jid.split("@")[0];
+            return item.name.toLowerCase().includes(search.toLowerCase());
+        }
+    );
 
     const doNavigationLogOut = () => navigate("/login");
 
     return (
-        <div className={"w-1/6 h-screen bg-[#1c1c1c] border-r border-[#666666] flex flex-col justify-between min-w-[226px]"}>
+        <div
+            className={"w-1/6 h-screen bg-[#1c1c1c] border-r border-[#666666] flex flex-col justify-between min-w-[226px]"}>
             <div>
                 <span className={"text-white font-bold p-2"}>Alumchat.lol</span>
-                <ChatOptions/>
+                <div className={"flex flex-row items-center justify-between p-2 gap-2 border-b border-[#666666]"}>
+                    <label
+                        className="input input-bordered flex items-center gap-2 bg-transparent border-[#666666] border p-2 placeholder-[#666666] text-white h-10">
+                        <input type="text" className="w-full" placeholder={"Search"} onChange={(e) => setSearch(e.target.value)}/>
+                        <Search/>
+                    </label>
+                    <div className="dropdown">
+                        <div tabIndex={0} role="button"
+                             className="btn m-1 bg-[#0a59b8] hover:bg-[#1ed760] text-white hover:text-black">+
+                        </div>
+                        <ul tabIndex={0}
+                            className="dropdown-content menu bg-[#212121] rounded-box z-[1] w-40 p-2 shadow">
+                            <li><a>Start Chat...</a></li>
+                            <li><a>Create Group Chat...</a></li>
+                            <li><a>Add Contact...</a></li>
+                        </ul>
+                    </div>
+                </div>
             </div>
-            {messages && <div className={"w-full h-full"}>
-                {messages.map((message, index) => (
-                    <ChatPreview key={index} username={message.username} message={message.message}
-                                 image={message.image}/>
-                ))}
-            </div>}
-            {!messages && <div className={"w-full h-full flex items-center justify-center"}>
-                <span className={"text-white"}>No messages</span>
-            </div>}
+            <div className={"w-full h-full overflow-y-auto"}>
+                <div className={"flex items-center justify-between"}>
+                    <span className={"text-white font-bold p-2"}>Roster</span>
+                    <button
+                        onClick={() => Client.getRoster()}
+                        className={"text-white p-6"}>
+                        <div className={"flex items-center justify-center"}>
+                            <Refresh/>
+                        </div>
+                    </button>
+                </div>
+                <hr className={"border-[#666666] w-full"}/>
+                <div>
+                    {filteredRoster.map((item, index) => {
+                        item.name = item.jid.split("@")[0];
+                        return (
+                            <RosterPreview key={index} username={item.name}/>
+                        )
+                    })}
+                </div>
+                {filteredRoster.length === 0 && (
+                    <div className={"flex items-center justify-center h-32"}>
+                        <span className={"text-white"}>No contacts found</span>
+                    </div>
+                
+                )}
+            </div>
             <ProfilePreview
                 username={Client.username}
                 onLogOut={() => Client.logout(doNavigationLogOut)}
