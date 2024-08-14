@@ -165,21 +165,25 @@ class Client {
     onStanza(stanza) {
         console.log("STANZA\n", stanza.toString());
 
-        if (stanza.is("iq") && stanza.attrs.type === "result" && stanza.getChild("query", "jabber:iq:roster")) {
-            const items = stanza.getChild("query").getChildren("item");
-            const roster = items.map(item => ({
-                jid: item.attrs.jid,
-                name: item.attrs.name,
-                subscription: item.attrs.subscription
-            }));
-            if (this.rosterUpdateCallback) {
-                this.rosterUpdateCallback(roster);
+        if (stanza.is("iq") && stanza.attrs.type === "result") {
+            if (stanza.attrs.id === "get_roster" && stanza.getChild("query", "jabber:iq:roster")) {
+                const items = stanza.getChild("query").getChildren("item");
+                const roster = items.map(item => ({
+                    jid: item.attrs.jid,
+                    name: item.attrs.name,
+                    subscription: item.attrs.subscription
+                }));
+                if (this.rosterUpdateCallback) {
+                    this.rosterUpdateCallback(roster);
+                }
+            } else if (stanza.attrs.id === "remove_contact" || stanza.attrs.id === "add_contact") {
+                // Fetch the updated roster after removing a contact
+                this.getRoster();
             }
         } else if (stanza.is("presence")) {
             const jid = stanza.attrs.from;
             const presence = stanza.getChildText("show") || "Online";
             if (this.presenceUpdateCallback) {
-                // Map the presence to a more readable format
                 const presenceMap = {
                     chat: "Online",
                     xa: "Not Available",
