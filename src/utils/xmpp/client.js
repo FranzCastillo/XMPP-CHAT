@@ -105,6 +105,23 @@ class Client {
         }
     }
 
+    async getPresence(jid) {
+        if (this.xmpp) {
+            const presenceRequest = xml(
+                "iq",
+                { type: "get", id: "get_presence" },
+                xml("query", { xmlns: "jabber:iq:roster" },
+                    xml("item", { jid })
+                )
+            );
+            await this.xmpp.send(presenceRequest);
+        }
+    }
+
+    setPresenceUpdateCallback(callback) {
+        this.presenceUpdateCallback = callback;
+    }
+
     async getVCard(jid) {
         if (this.xmpp) {
             const vCardRequest = xml(
@@ -158,9 +175,22 @@ class Client {
             if (this.rosterUpdateCallback) {
                 this.rosterUpdateCallback(roster);
             }
-        } else if (stanza.is("presence") && stanza.attrs.type === "subscribed") {
-            // Handle subscription stanzas
-            this.getRoster();
+        } else if (stanza.is("presence")) {
+            const jid = stanza.attrs.from;
+            const presence = stanza.getChildText("show") || "Online";
+            if (this.presenceUpdateCallback) {
+                // Map the presence to a more readable format
+                const presenceMap = {
+                    chat: "Online",
+                    xa: "Not Available",
+                    away: "Away",
+                    dnd: "Busy"
+                };
+                this.presenceUpdateCallback(jid, presenceMap[presence] || presence);
+            }
+        } else if (stanza.is("iq") && stanza.attrs.type === "result" && stanza.getChild("vCard")) {
+            const vCard = stanza.getChild("vCard").getChildText("FN");
+            console.log("vCard", vCard);
         }
     }
 

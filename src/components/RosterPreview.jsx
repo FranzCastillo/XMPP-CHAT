@@ -1,15 +1,26 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import Client from "../utils/xmpp/client";
 import Menu from "../assets/menu";
 
 function RosterPreview({key, username}) {
+    const jid = `${username}@alumchat.lol`;
+
+    const [presence, setPresence] = useState("Online");
+    useEffect(() => {
+        Client.setPresenceUpdateCallback((jid, presence) => {
+            if (jid === jid) {
+                setPresence(presence);
+            }
+        });
+        Client.getPresence(jid);
+    }, []);
+
+
     const handleRemoveContact = () => {
-        const jid = `${username}@alumchat.lol`;
         Client.removeContact(jid);
     };
 
     const handleInformation = () => {
-        const jid = `${username}@alumchat.lol`;
         Client.getVCard(jid);
     }
 
@@ -19,7 +30,7 @@ function RosterPreview({key, username}) {
                 <div className="w-10 h-10 rounded-full bg-[#666666]"/>
                 <div className={"flex flex-col"}>
                     <span className="text-white truncate w-32">{username}</span>
-                    <span className="text-[#666666] text-xs">Online</span>
+                    <span className="text-[#666666] text-xs">{presence}</span>
                 </div>
             </div>
             <div className="dropdown dropdown-bottom dropdown-end">

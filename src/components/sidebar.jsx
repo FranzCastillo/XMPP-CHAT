@@ -11,7 +11,6 @@ const Sidebar = ({messages}) => {
     const [roster, setRoster] = useState([]);
     useEffect(() => {
         Client.setRosterUpdateCallback((updatedRoster) => {
-            console.log("Roster Updated:", updatedRoster);
             setRoster(updatedRoster);
         });
         Client.getRoster();
