@@ -50,36 +50,41 @@ class Client {
     }
 
     async changePresence(status) {
-        console.log("Set status to", status);
+        console.log("Attempting to set status to", status);
         if (this.xmpp) {
-            let show;
-            switch (status) {
-                case "Online":
-                    show = "chat";
-                    break;
-                case "Not Available":
-                    show = "xa";
-                    break;
-                case "Away":
-                    show = "away";
-                    break;
-                case "Busy":
-                    show = "dnd";
-                    break;
-                case "Offline":
-                    show = null; // Offline uses a different approach
-                    await this.xmpp.send(xml("presence", { type: "unavailable" }));
-                    return;
-                default:
-                    show = "chat";
+            const presenceMap = {
+                "Online": "chat",
+                "Not Available": "xa",
+                "Away": "away",
+                "Busy": "dnd",
+                "Offline": null
+            };
+
+            const show = presenceMap[status];
+
+            if (show === undefined) {
+                console.error("Unknown status:", status);
+                return;
             }
 
-            await this.xmpp.send(xml("presence", {},
+            // Log the status and corresponding show value
+            console.log(`Mapped status "${status}" to show value "${show}"`);
+
+            if (status === "Offline") {
+                await this.xmpp.send(xml("presence", { type: "unavailable" }));
+                return;
+            }
+
+            const presenceStanza = xml("presence", {},
                 show ? xml("show", {}, show) : null,
                 xml("status", {}, status)
-            ));
+            );
+
+            console.log("Sending presence stanza:", presenceStanza.toString());
+            await this.xmpp.send(presenceStanza);
         }
     }
+
 
     async getRoster() {
         if (this.xmpp) {
@@ -146,6 +151,12 @@ class Client {
                 )
             );
             await this.xmpp.send(addRequest);
+
+            const subscribeRequest = xml(
+                "presence",
+                { type: "subscribe", to: jid }
+            );
+            await this.xmpp.send(subscribeRequest);
         }
     }
 
@@ -182,15 +193,15 @@ class Client {
             }
         } else if (stanza.is("presence")) {
             const jid = stanza.attrs.from;
-            const presence = stanza.getChildText("show") || "Online";
+            const presence = stanza.getChildText("show") || "Available";
             if (this.presenceUpdateCallback) {
                 const presenceMap = {
-                    chat: "Online",
+                    chat: "Available",
                     xa: "Not Available",
                     away: "Away",
                     dnd: "Busy"
                 };
-                this.presenceUpdateCallback(jid, presenceMap[presence] || presence);
+                this.presenceUpdateCallback(jid.split("/")[0], presenceMap[presence] || presence);
             }
         } else if (stanza.is("iq") && stanza.attrs.type === "result" && stanza.getChild("vCard")) {
             const vCard = stanza.getChild("vCard").getChildText("FN");
