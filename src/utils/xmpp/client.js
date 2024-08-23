@@ -1,4 +1,4 @@
-import { client, xml } from "@xmpp/client/browser";
+import {client, xml} from "@xmpp/client/browser";
 
 class Client {
     constructor() {
@@ -41,7 +41,7 @@ class Client {
     async logout(doNavigation) {
         if (this.xmpp) {
             // Send unavailable presence to indicate logout
-            await this.xmpp.send(xml("presence", { type: "unavailable" }));
+            await this.xmpp.send(xml("presence", {type: "unavailable"}));
             this.xmpp.stop();
             this.xmpp = null;
 
@@ -49,11 +49,11 @@ class Client {
         }
     }
 
-    async changePresence(status) {
-        console.log("Attempting to set status to", status);
+    async changePresence(status, statusMessage = "") {
+        console.log("Attempting to set status to", status, "with message:", statusMessage);
         if (this.xmpp) {
             const presenceMap = {
-                "Online": "chat",
+                "Available": "chat",
                 "Not Available": "xa",
                 "Away": "away",
                 "Busy": "dnd",
@@ -67,17 +67,15 @@ class Client {
                 return;
             }
 
-            // Log the status and corresponding show value
-            console.log(`Mapped status "${status}" to show value "${show}"`);
-
             if (status === "Offline") {
-                await this.xmpp.send(xml("presence", { type: "unavailable" }));
+                await this.xmpp.send(xml("presence", {type: "unavailable"}));
                 return;
             }
 
+            // Include both the show and status fields in the presence stanza
             const presenceStanza = xml("presence", {},
                 show ? xml("show", {}, show) : null,
-                xml("status", {}, status)
+                statusMessage ? xml("status", {}, statusMessage) : null
             );
 
             console.log("Sending presence stanza:", presenceStanza.toString());
@@ -90,8 +88,8 @@ class Client {
         if (this.xmpp) {
             const rosterRequest = xml(
                 "iq",
-                { type: "get", id: "get_roster" },
-                xml("query", { xmlns: "jabber:iq:roster" })
+                {type: "get", id: "get_roster"},
+                xml("query", {xmlns: "jabber:iq:roster"})
             );
             await this.xmpp.send(rosterRequest);
         }
@@ -101,9 +99,9 @@ class Client {
         if (this.xmpp) {
             const removeRequest = xml(
                 "iq",
-                { type: "set", id: "remove_contact" },
-                xml("query", { xmlns: "jabber:iq:roster" },
-                    xml("item", { jid, subscription: "remove" })
+                {type: "set", id: "remove_contact"},
+                xml("query", {xmlns: "jabber:iq:roster"},
+                    xml("item", {jid, subscription: "remove"})
                 )
             );
             await this.xmpp.send(removeRequest);
@@ -114,9 +112,9 @@ class Client {
         if (this.xmpp) {
             const presenceRequest = xml(
                 "iq",
-                { type: "get", id: "get_presence" },
-                xml("query", { xmlns: "jabber:iq:roster" },
-                    xml("item", { jid })
+                {type: "get", id: "get_presence"},
+                xml("query", {xmlns: "jabber:iq:roster"},
+                    xml("item", {jid})
                 )
             );
             await this.xmpp.send(presenceRequest);
@@ -127,34 +125,21 @@ class Client {
         this.presenceUpdateCallback = callback;
     }
 
-    async getVCard(jid) {
-        if (this.xmpp) {
-            const vCardRequest = xml(
-                "iq",
-                {type: "get", id: "get_vcard"},
-                xml("vCard", {xmlns: "vcard-temp"},
-                    xml("FN")
-                )
-            );
-            await this.xmpp.send(vCardRequest);
-        }
-    }
-
 
     async addContact(jid) {
         if (this.xmpp) {
             const addRequest = xml(
                 "iq",
-                { type: "set", id: "add_contact" },
-                xml("query", { xmlns: "jabber:iq:roster" },
-                    xml("item", { jid, name: jid.split("@")[0] })
+                {type: "set", id: "add_contact"},
+                xml("query", {xmlns: "jabber:iq:roster"},
+                    xml("item", {jid, name: jid.split("@")[0]})
                 )
             );
             await this.xmpp.send(addRequest);
 
             const subscribeRequest = xml(
                 "presence",
-                { type: "subscribe", to: jid }
+                {type: "subscribe", to: jid}
             );
             await this.xmpp.send(subscribeRequest);
         }

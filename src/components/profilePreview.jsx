@@ -1,13 +1,24 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import Menu from "../assets/menu";
 import User from "../assets/user";
 
 const ProfilePreview = ({username, onLogOut, onStatusChange, onAccDelete}) => {
-    const [status, setStatus] = useState("Online")
-    const handleStatusChange = (status) => {
-        setStatus(status)
-        onStatusChange(status)
-    }
+    const [status, setStatus] = useState("Available");
+    const [statusMessage, setStatusMessage] = useState("");
+
+    useEffect(() => {
+        // Call onStatusChange every time status or statusMessage changes
+        onStatusChange(status, statusMessage);
+    }, [status, statusMessage, onStatusChange]);
+
+    const handleStatusChange = (e) => {
+        setStatus(e.target.value);
+    };
+
+    const handleStatusMessageChange = (e) => {
+        setStatusMessage(e.target.value);
+    };
+
     return (
         <div className={"flex flex-row justify-between p-2 border-t border-[#666666] w-full"}>
             <div className={"flex flex-row items-center gap-2"}>
@@ -17,9 +28,9 @@ const ProfilePreview = ({username, onLogOut, onStatusChange, onAccDelete}) => {
                     <select
                         className={"bg-transparent text-[#b3b3b3] shadow-accent cursor-pointer text-xs"}
                         value={status}
-                        onChange={(e) => handleStatusChange(e.target.value)}
+                        onChange={handleStatusChange}
                     >
-                        <option value="Online" className={"bg-[#212121] hover:bg-[#333333]"}>Online</option>
+                        <option value="Available" className={"bg-[#212121] hover:bg-[#333333]"}>Available</option>
                         <option value="Not Available" className={"bg-[#212121] hover:bg-[#333333]"}>Not Available
                         </option>
                         <option value="Away" className={"bg-[#212121] hover:bg-[#333333]"}>Away</option>
@@ -37,6 +48,19 @@ const ProfilePreview = ({username, onLogOut, onStatusChange, onAccDelete}) => {
                     <li><a onClick={onLogOut}>Log Out</a></li>
                     <li><a onClick={onAccDelete}>Delete Account</a></li>
                 </ul>
+            </div>
+            <div className={"flex flex-row"}>
+                <input
+                    type="text"
+                    className={"bg-transparent text-[#b3b3b3] shadow-accent cursor-pointer text-xs"}
+                    placeholder="Status Message..."
+                    value={statusMessage}
+                    onChange={handleStatusMessageChange}
+                />
+                <button onClick={() => onStatusChange(status, statusMessage)}
+                        className={"btn m-1 bg-[#0a59b8] hover:bg-[#1ed760] text-white hover:text-black"}>
+                    Set
+                </button>
             </div>
         </div>
     );

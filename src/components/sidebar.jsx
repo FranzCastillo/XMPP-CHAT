@@ -104,12 +104,14 @@ const Sidebar = ({messages}) => {
 
                 )}
             </div>
-            <ProfilePreview
-                username={Client.username}
-                onLogOut={() => Client.logout(doNavigationLogOut)}
-                onStatusChange={(status) => Client.changePresence(status)}
-                onAccDelete={() => console.log("Deleting account")}  // TODO: Implement account deletion
-            />
+            <div>
+                <ProfilePreview
+                    username={Client.username}
+                    onLogOut={() => Client.logout(doNavigationLogOut)}
+                    onStatusChange={(status, message) => Client.changePresence(status, message)}
+                    onAccDelete={() => console.log("Deleting account")}  // TODO: Implement account deletion
+                />
+            </div>
         </div>
     );
 };
