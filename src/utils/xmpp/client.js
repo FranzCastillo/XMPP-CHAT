@@ -199,6 +199,7 @@ class Client {
         console.log("STANZA\n", stanza.toString());
 
         if (stanza.is("message") && stanza.attrs.type === "chat") {
+            console.error("MESSAGE\n", stanza.toString());
             const jid = stanza.attrs.from.split("/")[0];
             const body = stanza.getChildText("body");
             if (this.messageCallback && body) {

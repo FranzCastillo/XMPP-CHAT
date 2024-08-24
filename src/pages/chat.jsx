@@ -8,10 +8,11 @@ const Chat = (props) => {
     const [messages, setMessages] = useState([]);
 
     useEffect(() => {
+        setMessages([]);
         if (displayedChat) {
             client.setMessageCallback((jid, message) => {
                 if (jid === displayedChat) {
-                    setMessages(prevMessages => [...prevMessages, message]);
+                    setMessages(prevMessages => [...prevMessages, {text: message, sender: 'received'}]);
                 }
             });
         }
@@ -27,18 +28,17 @@ const Chat = (props) => {
                         messages={messages}
                         sendMessage={(message) => {
                             client.sendMessage(displayedChat, message);
-                            setMessages(prevMessages => [...prevMessages, message]);
+                            setMessages(prevMessages => [...prevMessages, {text: message, sender: 'sent'}]);
                         }}
                     />
                 ) : (
                     <div className={"flex flex-col items-center justify-center h-full"}>
                         <span className={"text-white"}>Select a chat to start messaging</span>
                     </div>
-                )
-                }
+                )}
             </div>
         </div>
-    )
+    );
 };
 
 export default Chat;
