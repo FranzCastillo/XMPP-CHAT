@@ -5,18 +5,28 @@ import client from "../utils/xmpp/client";
 
 const Chat = (props) => {
     const [displayedChat, setDisplayedChat] = useState(null);
-    const [messages, setMessages] = useState([]);
+    const [messages, setMessages] = useState({});
 
     useEffect(() => {
-        setMessages([]);
         if (displayedChat) {
             client.setMessageCallback((jid, message) => {
                 if (jid === displayedChat) {
-                    setMessages(prevMessages => [...prevMessages, {text: message, sender: 'received'}]);
+                    setMessages(prevMessages => ({
+                        ...prevMessages,
+                        [displayedChat]: [...(prevMessages[displayedChat] || []), {text: message, sender: 'received'}]
+                    }));
                 }
             });
         }
     }, [displayedChat]);
+
+    const sendMessage = (message) => {
+        client.sendMessage(displayedChat, message);
+        setMessages(prevMessages => ({
+            ...prevMessages,
+            [displayedChat]: [...(prevMessages[displayedChat] || []), {text: message, sender: 'sent'}]
+        }));
+    };
 
     return (
         <div className={"flex flex-row h-screen"}>
@@ -25,11 +35,8 @@ const Chat = (props) => {
                 {displayedChat ? (
                     <ChatDisplay
                         jid={displayedChat}
-                        messages={messages}
-                        sendMessage={(message) => {
-                            client.sendMessage(displayedChat, message);
-                            setMessages(prevMessages => [...prevMessages, {text: message, sender: 'sent'}]);
-                        }}
+                        messages={messages[displayedChat] || []}
+                        sendMessage={sendMessage}
                     />
                 ) : (
                     <div className={"flex flex-col items-center justify-center h-full"}>
