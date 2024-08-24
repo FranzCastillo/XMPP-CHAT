@@ -121,6 +121,23 @@ class Client {
         }
     }
 
+    async getPresenceMessage(jid) {
+        if (this.xmpp) {
+            const presenceRequest = xml(
+                "iq",
+                {type: "get", id: "get_presence"},
+                xml("query", {xmlns: "jabber:iq:roster"},
+                    xml("item", {jid})
+                )
+            );
+            await this.xmpp.send(presenceRequest);
+        }
+    }
+
+    setMessageCallback(callback) {
+        this.messageCallback = callback;
+    }
+
     setPresenceUpdateCallback(callback) {
         this.presenceUpdateCallback = callback;
     }
@@ -161,7 +178,13 @@ class Client {
     onStanza(stanza) {
         console.log("STANZA\n", stanza.toString());
 
-        if (stanza.is("iq") && stanza.attrs.type === "result") {
+        if (stanza.is("message") && stanza.attrs.type === "chat") {
+            const jid = stanza.attrs.from.split("/")[0];
+            const body = stanza.getChildText("body");
+            if (this.messageCallback && body) {
+                this.messageCallback(jid, body);
+            }
+        } else if (stanza.is("iq") && stanza.attrs.type === "result") {
             if (stanza.attrs.id === "get_roster" && stanza.getChild("query", "jabber:iq:roster")) {
                 const items = stanza.getChild("query").getChildren("item");
                 const roster = items.map(item => ({

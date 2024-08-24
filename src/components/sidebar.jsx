@@ -6,7 +6,7 @@ import RosterPreview from "./RosterPreview";
 import Refresh from "../assets/refresh";
 import Search from "../assets/search";
 
-const Sidebar = ({messages}) => {
+const Sidebar = ({setDisplayedChat}) => {
     const navigate = useNavigate();
     const [roster, setRoster] = useState([]);
     useEffect(() => {
@@ -32,6 +32,10 @@ const Sidebar = ({messages}) => {
         Client.addContact(jid);
         document.getElementById('contact_modal').close();
     };
+
+    const handleStartChat = (jid) => {
+        setDisplayedChat(jid);
+    }
 
     return (
         <div
@@ -93,7 +97,7 @@ const Sidebar = ({messages}) => {
                     {filteredRoster.map((item, index) => {
                         item.name = item.jid.split("@")[0];
                         return (
-                            <RosterPreview key={index} username={item.name}/>
+                            <RosterPreview key={index} username={item.name} startChatCallback={() => handleStartChat(item.jid)}/>
                         )
                     })}
                 </div>

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Client from "../utils/xmpp/client";
 import Menu from "../assets/menu";
 
-function RosterPreview({ key, username }) {
+function RosterPreview({ key, username, startChatCallback }) {
     const jid = `${username}@alumchat.lol`;
 
     const [presence, setPresence] = useState("Unavailable");
@@ -22,10 +22,6 @@ function RosterPreview({ key, username }) {
         Client.removeContact(jid);
     };
 
-    const handleInformation = () => {
-        Client.getVCard(jid);
-    };
-
     return (
         <div className="flex flex-row items-center justify-between p-2 cursor-pointer hover:bg-[#212121] relative">
             <div className="flex flex-row items-center gap-2">
@@ -40,7 +36,7 @@ function RosterPreview({ key, username }) {
                     <Menu />
                 </div>
                 <ul tabIndex="0" className="dropdown-content menu bg-[#212121] rounded-box z-[1] w-fit p-2 shadow">
-                    <li><a onClick={handleInformation}>Information</a></li>
+                    <li><a onClick={startChatCallback}>Start Chat...</a></li>
                     <li><a onClick={handleRemoveContact}>Remove Contact</a></li>
                 </ul>
             </div>
