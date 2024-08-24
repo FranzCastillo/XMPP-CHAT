@@ -2,6 +2,7 @@ import React, {useState, useEffect} from 'react';
 import Sidebar from "../components/sidebar";
 import ChatDisplay from "../components/chatDisplay";
 import client from "../utils/xmpp/client";
+import Swal from 'sweetalert2';
 
 const Chat = (props) => {
     const [displayedChat, setDisplayedChat] = useState(null);
@@ -13,8 +14,23 @@ const Chat = (props) => {
                 ...prevMessages,
                 [jid]: [...(prevMessages[jid] || []), {text: message, sender: 'received'}]
             }));
+
+            if (jid !== displayedChat) {
+                Swal.fire({
+                    position: "top-end",
+                    title: `New message from ${jid}`,
+                    showConfirmButton: false,
+                    timer: 1500,
+                    backdrop: false,
+                    customClass: {
+                        popup: "bg-[#2d2d2d] text-white p-2 w-48",
+                        title: "text-white text-sm",
+                        icon: "w-4 h-4"
+                    }
+                });
+            }
         });
-    }, []);
+    }, [displayedChat]);
 
     const sendMessage = (message) => {
         client.sendMessage(displayedChat, message);
