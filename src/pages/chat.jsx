@@ -8,17 +8,13 @@ const Chat = (props) => {
     const [messages, setMessages] = useState({});
 
     useEffect(() => {
-        if (displayedChat) {
-            client.setMessageCallback((jid, message) => {
-                if (jid === displayedChat) {
-                    setMessages(prevMessages => ({
-                        ...prevMessages,
-                        [displayedChat]: [...(prevMessages[displayedChat] || []), {text: message, sender: 'received'}]
-                    }));
-                }
-            });
-        }
-    }, [displayedChat]);
+        client.setMessageCallback((jid, message) => {
+            setMessages(prevMessages => ({
+                ...prevMessages,
+                [jid]: [...(prevMessages[jid] || []), {text: message, sender: 'received'}]
+            }));
+        });
+    }, []);
 
     const sendMessage = (message) => {
         client.sendMessage(displayedChat, message);
