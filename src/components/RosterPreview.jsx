@@ -9,9 +9,7 @@ function RosterPreview({ key, username, startChatCallback }) {
 
     useEffect(() => {
         Client.setPresenceUpdateCallback((fromJid, newPresence) => {
-            console.error(`${fromJid} to ${jid} [${fromJid === jid}] ${newPresence}`);
             if (fromJid === jid) {
-                console.error(`Updating presence for ${jid} to ${newPresence}`);
                 setPresence(newPresence);
             }
         });

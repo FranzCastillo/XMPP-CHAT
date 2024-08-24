@@ -7,6 +7,8 @@ import Swal from 'sweetalert2';
 const Chat = (props) => {
     const [displayedChat, setDisplayedChat] = useState(null);
     const [messages, setMessages] = useState({});
+    const [presenceStatus, setPresenceStatus] = useState({});
+    const [statusMessages, setStatusMessages] = useState({});
 
     useEffect(() => {
         client.setMessageCallback((jid, message) => {
@@ -30,6 +32,18 @@ const Chat = (props) => {
                 });
             }
         });
+
+        client.setStatusUpdateCallback((jid, statusMessage) => {
+            setStatusMessages(prevStatusMessages => ({
+                ...prevStatusMessages,
+                [jid]: statusMessage
+            }));
+
+            // Re-render the chat display if the status message belongs to the displayed chat
+            if (jid === displayedChat) {
+                setDisplayedChat(jid);  // This will trigger a re-render
+            }
+        });
     }, [displayedChat]);
 
     const sendMessage = (message) => {
@@ -47,6 +61,8 @@ const Chat = (props) => {
                 {displayedChat ? (
                     <ChatDisplay
                         jid={displayedChat}
+                        presence={presenceStatus[displayedChat] || "Available"}
+                        presenceMessage={statusMessages[displayedChat] || ""}
                         messages={messages[displayedChat] || []}
                         sendMessage={sendMessage}
                     />
@@ -58,6 +74,7 @@ const Chat = (props) => {
             </div>
         </div>
     );
+
 };
 
 export default Chat;

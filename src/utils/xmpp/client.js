@@ -121,14 +121,11 @@ class Client {
 
     async getPresenceMessage(jid) {
         if (this.xmpp) {
-            const presenceRequest = xml(
-                "iq",
-                {type: "get", id: "get_presence"},
-                xml("query", {xmlns: "jabber:iq:roster"},
-                    xml("item", {jid})
-                )
+            const presenceProbe = xml(
+                "presence",
+                {type: "probe", to: jid}
             );
-            await this.xmpp.send(presenceRequest);
+            await this.xmpp.send(presenceProbe);
         }
     }
 
@@ -195,11 +192,14 @@ class Client {
         }
     }
 
+    setStatusUpdateCallback(callback) {
+        this.statusUpdateCallback = callback;
+    }
+
     onStanza(stanza) {
         console.log("STANZA\n", stanza.toString());
 
         if (stanza.is("message") && stanza.attrs.type === "chat") {
-            console.error("MESSAGE\n", stanza.toString());
             const jid = stanza.attrs.from.split("/")[0];
             const body = stanza.getChildText("body");
             if (this.messageCallback && body) {
@@ -217,13 +217,37 @@ class Client {
                     this.rosterUpdateCallback(roster);
                 }
             } else if (stanza.attrs.id === "remove_contact" || stanza.attrs.id === "add_contact") {
-                // Fetch the updated roster after removing a contact
+                // Fetch the updated roster after removing or adding a contact
                 this.getRoster();
             }
         } else if (stanza.is("presence")) {
             const jid = stanza.attrs.from;
-            const presence = stanza.getChildText("show") || "Available";
-            if (this.presenceUpdateCallback) {
+            const presence = stanza.getChildText("show") || "chat";
+            const status = stanza.getChildText("status") || null;
+
+            // Handle incoming subscription requests
+            if (stanza.attrs.type === "subscribe") {
+                // Automatically approve the subscription request
+                const subscribedResponse = xml("presence", {
+                    type: "subscribed",
+                    to: jid
+                });
+                this.xmpp.send(subscribedResponse);
+
+                // Send a subscription request back to the contact if needed
+                const subscribeResponse = xml("presence", {
+                    type: "subscribe",
+                    to: jid
+                });
+                this.xmpp.send(subscribeResponse);
+            } else if (stanza.attrs.type === "subscribed") {
+                console.log(`${jid} accepted your subscription request.`);
+            } else if (stanza.attrs.type === "unsubscribed") {
+                console.log(`${jid} declined your subscription request.`);
+            }
+
+            // Only update if status is not empty
+            if (status !== null && this.presenceUpdateCallback) {
                 const presenceMap = {
                     chat: "Available",
                     xa: "Not Available",
@@ -231,6 +255,11 @@ class Client {
                     dnd: "Busy"
                 };
                 this.presenceUpdateCallback(jid.split("/")[0], presenceMap[presence] || presence);
+            }
+
+            // Update status if it's meaningful and not the user's own status
+            if (this.statusUpdateCallback && jid.split("/")[0] !== this.username && status) {
+                this.statusUpdateCallback(jid.split("/")[0], status);
             }
         }
     }

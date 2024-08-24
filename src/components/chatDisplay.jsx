@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useRef} from 'react';
 
-function ChatDisplay({jid, presence="Available", presenceMessage="DEFAULT Presence", messages=[], sendMessage}) {
+function ChatDisplay({jid, presence="Available", presenceMessage="", messages=[], sendMessage}) {
     const [inputValue, setInputValue] = useState("");
     const messagesEndRef = useRef(null);
 
