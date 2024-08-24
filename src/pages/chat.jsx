@@ -22,7 +22,14 @@ const Chat = (props) => {
             <Sidebar setDisplayedChat={setDisplayedChat}/>
             <div className={"flex-grow"}>
                 {displayedChat ? (
-                    <ChatDisplay jid={displayedChat} messages={messages}/>
+                    <ChatDisplay
+                        jid={displayedChat}
+                        messages={messages}
+                        sendMessage={(message) => {
+                            client.sendMessage(displayedChat, message);
+                            setMessages(prevMessages => [...prevMessages, message]);
+                        }}
+                    />
                 ) : (
                     <div className={"flex flex-col items-center justify-center h-full"}>
                         <span className={"text-white"}>Select a chat to start messaging</span>

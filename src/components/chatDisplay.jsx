@@ -1,12 +1,11 @@
 import React, {useState, useEffect} from 'react';
 
-function ChatDisplay({jid, presence="Available", presenceMessage="DEFAULT Presence", messages=[]}) {
+function ChatDisplay({jid, presence="Available", presenceMessage="DEFAULT Presence", messages=[], sendMessage}) {
     const [inputValue, setInputValue] = useState("");
 
     const handleSendMessage = () => {
         if (inputValue.trim() !== "") {
-            // Add logic to send the message
-            console.log("Sending message:", inputValue);
+            sendMessage(inputValue);
             setInputValue(""); // Clear the input field
         }
     };
@@ -30,8 +29,10 @@ function ChatDisplay({jid, presence="Available", presenceMessage="DEFAULT Presen
             <div className={"flex-grow overflow-y-auto"}>
                 {/* Displays the chat messages */}
                 {messages.map((msg, index) => (
-                    <div key={index} className={"p-2"}>
-                        <span className={"text-white"}>{msg}</span>
+                    <div key={index} className={"chat chat-end"}>
+                        <div className={"chat-bubble"}>
+                            {msg}
+                        </div>
                     </div>
                 ))}
             </div>

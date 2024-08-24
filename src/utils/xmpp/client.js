@@ -50,7 +50,6 @@ class Client {
     }
 
     async changePresence(status, statusMessage = "") {
-        console.log("Attempting to set status to", status, "with message:", statusMessage);
         if (this.xmpp) {
             const presenceMap = {
                 "Available": "chat",
@@ -78,7 +77,6 @@ class Client {
                 statusMessage ? xml("status", {}, statusMessage) : null
             );
 
-            console.log("Sending presence stanza:", presenceStanza.toString());
             await this.xmpp.send(presenceStanza);
         }
     }
@@ -175,6 +173,28 @@ class Client {
         console.log("offline");
     }
 
+    async sendMessage(jid, message) {
+        if (this.xmpp) {
+            const messageStanza = xml(
+                "message",
+                {to: jid, type: "chat"},
+                xml("body", {}, message)
+            );
+            await this.xmpp.send(messageStanza);
+        }
+    }
+
+    async sendMessageToGroup(jid, message) {
+        if (this.xmpp) {
+            const messageStanza = xml(
+                "message",
+                {to: jid, type: "groupchat"},
+                xml("body", {}, message)
+            );
+            await this.xmpp.send(messageStanza);
+        }
+    }
+
     onStanza(stanza) {
         console.log("STANZA\n", stanza.toString());
 
@@ -211,9 +231,6 @@ class Client {
                 };
                 this.presenceUpdateCallback(jid.split("/")[0], presenceMap[presence] || presence);
             }
-        } else if (stanza.is("iq") && stanza.attrs.type === "result" && stanza.getChild("vCard")) {
-            const vCard = stanza.getChild("vCard").getChildText("FN");
-            console.log("vCard", vCard);
         }
     }
 
