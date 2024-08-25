@@ -1,13 +1,13 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 
-function ChatDisplay({jid, presence="Available", presenceMessage="", messages=[], sendMessage}) {
+function ChatDisplay({jid, presence = "Available", presenceMessage = "", messages = [], sendMessage}) {
     const [inputValue, setInputValue] = useState("");
     const messagesEndRef = useRef(null);
 
     const handleSendMessage = () => {
         if (inputValue.trim() !== "") {
             sendMessage(inputValue);
-            setInputValue(""); // Clear the input field
+            setInputValue("");
         }
     };
 
@@ -18,7 +18,7 @@ function ChatDisplay({jid, presence="Available", presenceMessage="", messages=[]
     };
 
     const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        messagesEndRef.current?.scrollIntoView({behavior: "smooth"});
     };
 
     useEffect(() => {
@@ -37,11 +37,12 @@ function ChatDisplay({jid, presence="Available", presenceMessage="", messages=[]
             </div>
             <div className={"flex-grow p-2 overflow-y-auto flex flex-col"}>
                 {messages.map((msg, index) => (
-                    <div key={index} className={`flex flex-row ${msg.sender === "sent" ? "chat-end justify-end" : "chat-start justify-start"} pb-1`}>
+                    <div key={index}
+                         className={`flex flex-row ${msg.sender === "sent" ? "chat-end justify-end" : "chat-start justify-start"} pb-1`}>
                         <span className={"chat-bubble"}>{msg.text}</span>
                     </div>
                 ))}
-                <div ref={messagesEndRef} />
+                <div ref={messagesEndRef}/>
             </div>
             <div>
                 <input

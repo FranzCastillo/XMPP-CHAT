@@ -5,20 +5,20 @@ import Client from "../utils/xmpp/client";
 import {useNavigate} from "react-router-dom";
 
 const Login = () => {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
+    const [username, setUsername] = useState("");  // Stores the username
+    const [password, setPassword] = useState("");  // Stores the password
+    const [error, setError] = useState("");  // If an error occurs, this will be displayed
 
     const navigate = useNavigate();
 
-    const doNavigation = () => {
+    const doNavigation = () => {  // Redirects to the chat page if the login is successful
         navigate("/chat");
     }
 
     const handleSubmit = (event) => {
         event.preventDefault();
 
-        if (!username || !password) {
+        if (!username || !password) {  // If any field is empty, display an error
             setError("Please fill all fields");
             return;
         }
@@ -27,6 +27,7 @@ const Login = () => {
             // Clean previous error
             setError("");
 
+            // Even though I tried using Try-Catch at multiple scopes, wasn't able to catch unsuccesful logins
             Client.login(username, password, doNavigation);
         } catch (e) {
             setError("Invalid username or password");

@@ -8,7 +8,9 @@ import Search from "../assets/search";
 
 const Sidebar = ({setDisplayedChat}) => {
     const navigate = useNavigate();
-    const [roster, setRoster] = useState([]);
+    const [roster, setRoster] = useState([]);  // Stores the roster displayed
+
+    // Set the function to be called when the roster is updated
     useEffect(() => {
         Client.setRosterUpdateCallback((updatedRoster) => {
             setRoster(updatedRoster);
@@ -16,6 +18,7 @@ const Sidebar = ({setDisplayedChat}) => {
         Client.getRoster();
     }, []);
 
+    // Filter the roster based on the search query
     const [search, setSearch] = useState("");
     const filteredRoster = roster.filter(item => {
             item.name = item.jid.split("@")[0];
@@ -97,7 +100,8 @@ const Sidebar = ({setDisplayedChat}) => {
                     {filteredRoster.map((item, index) => {
                         item.name = item.jid.split("@")[0];
                         return (
-                            <RosterPreview key={index} username={item.name} startChatCallback={() => handleStartChat(item.jid)}/>
+                            <RosterPreview key={index} username={item.name}
+                                           startChatCallback={() => handleStartChat(item.jid)}/>
                         )
                     })}
                 </div>

@@ -12,12 +12,13 @@ class Client {
         return Client.instance;
     }
 
+    // Set up the XMPP client and start it
     _setupClient(doNavigation) {
         try {
             this.xmpp.on("error", this.onError.bind(this));
             this.xmpp.on("offline", this.onOffline.bind(this));
             this.xmpp.on("stanza", this.onStanza.bind(this));
-            this.xmpp.on("online", (address) => this.onOnline(address, doNavigation));
+            this.xmpp.on("online", (address) => this.onOnline(address, doNavigation));  // When a client successfully logs in
 
             this.xmpp.start();
         } catch (err) {
@@ -25,7 +26,9 @@ class Client {
         }
     }
 
+    // Register a new account
     async signup(username, password, doNavigation) {
+        // Login as a root user to register a new account (needs a pre-existing account)
         this.login("cas21562-root", "cas21562", async () => {
             const registerRequest = xml(
                 "iq",
@@ -38,12 +41,13 @@ class Client {
 
             await this.xmpp.send(registerRequest);
 
+            // Handle the registration response
             this.xmpp.on("stanza", async (stanza) => {
                 if (stanza.is("iq") && stanza.attrs.id === "register_1") {
                     if (stanza.attrs.type === "result") {
                         console.log(`Registration successful for ${username}`);
 
-                        this.login(username, password, doNavigation);
+                        this.login(username, password, doNavigation);  // Log in with the new account
                     } else if (stanza.attrs.type === "error") {
                         console.error("Registration failed:", stanza.toString());
                     }
@@ -52,6 +56,7 @@ class Client {
         });
     }
 
+    // Log in to an existing account
     login(username, password, doNavigation) {
         this.username = username;
         this.password = password;
@@ -65,6 +70,7 @@ class Client {
         this._setupClient(doNavigation);
     }
 
+    // Delete the account
     async deleteAccount(doNavigation) {
         if (this.xmpp) {
             // Send the unregister request to delete the account
@@ -93,8 +99,7 @@ class Client {
         }
     }
 
-
-
+    // Log out of the account
     async logout(doNavigation) {
         if (this.xmpp) {
             // Send unavailable presence to indicate logout
@@ -108,8 +113,10 @@ class Client {
         }
     }
 
+    // Change the presence status
     async changePresence(status, statusMessage = "") {
         if (this.xmpp) {
+            // Maps the status to the corresponding XMPP presence show value
             const presenceMap = {
                 "Available": "chat",
                 "Not Available": "xa",
@@ -140,7 +147,7 @@ class Client {
         }
     }
 
-
+    // Fetch the roster
     async getRoster() {
         if (this.xmpp) {
             const rosterRequest = xml(
@@ -152,6 +159,7 @@ class Client {
         }
     }
 
+    // Removes a contact of the roster
     async removeContact(jid) {
         if (this.xmpp) {
             const removeRequest = xml(
@@ -165,6 +173,7 @@ class Client {
         }
     }
 
+    // Fetch the presence of a contact
     async getPresence(jid) {
         if (this.xmpp) {
             const presenceRequest = xml(
@@ -186,7 +195,7 @@ class Client {
         this.presenceUpdateCallback = callback;
     }
 
-
+    // Add a contact to the roster
     async addContact(jid) {
         if (this.xmpp) {
             const addRequest = xml(
@@ -198,6 +207,7 @@ class Client {
             );
             await this.xmpp.send(addRequest);
 
+            // Send a subscription request to the contact
             const subscribeRequest = xml(
                 "presence",
                 {type: "subscribe", to: jid}
@@ -219,6 +229,7 @@ class Client {
         console.log("offline");
     }
 
+    // Send a message to a contact
     async sendMessage(jid, message) {
         if (this.xmpp) {
             const messageStanza = xml(
@@ -230,32 +241,22 @@ class Client {
         }
     }
 
-    async sendMessageToGroup(jid, message) {
-        if (this.xmpp) {
-            const messageStanza = xml(
-                "message",
-                {to: jid, type: "groupchat"},
-                xml("body", {}, message)
-            );
-            await this.xmpp.send(messageStanza);
-        }
-    }
-
     setStatusUpdateCallback(callback) {
         this.statusUpdateCallback = callback;
     }
 
+    // Listener for all incoming stanzas
     onStanza(stanza) {
         console.log("STANZA\n", stanza.toString());
 
-        if (stanza.is("message") && stanza.attrs.type === "chat") {
+        if (stanza.is("message") && stanza.attrs.type === "chat") {  // Handle incoming messages
             const jid = stanza.attrs.from.split("/")[0];
             const body = stanza.getChildText("body");
             if (this.messageCallback && body) {
-                this.messageCallback(jid, body);
+                this.messageCallback(jid, body);  // Call the message callback to be displayed or send a notification
             }
-        } else if (stanza.is("iq") && stanza.attrs.type === "result") {
-            if (stanza.attrs.id === "get_roster" && stanza.getChild("query", "jabber:iq:roster")) {
+        } else if (stanza.is("iq") && stanza.attrs.type === "result") {  // Handle IQ responses (roster, presence, etc.)
+            if (stanza.attrs.id === "get_roster" && stanza.getChild("query", "jabber:iq:roster")) {  // Handle roster response
                 const items = stanza.getChild("query").getChildren("item");
                 const roster = items.map(item => ({
                     jid: item.attrs.jid,
@@ -263,15 +264,15 @@ class Client {
                     subscription: item.attrs.subscription
                 }));
                 if (this.rosterUpdateCallback) {
-                    this.rosterUpdateCallback(roster);
+                    this.rosterUpdateCallback(roster);  // Update the roster in the UI
                 }
-            } else if (stanza.attrs.id === "remove_contact" || stanza.attrs.id === "add_contact") {
+            } else if (stanza.attrs.id === "remove_contact" || stanza.attrs.id === "add_contact") {  // Handle contact removal or addition
                 // Fetch the updated roster after removing or adding a contact
                 this.getRoster();
             }
-        } else if (stanza.is("presence")) {
+        } else if (stanza.is("presence")) {  // Handle presence stanzas
             const jid = stanza.attrs.from;
-            const presence = stanza.getChildText("show") || "chat";
+            const presence = stanza.getChildText("show") || "chat";  // Stores the show attribute of the stanza
             const status = stanza.getChildText("status") || null;
 
             // Handle incoming subscription requests
@@ -288,6 +289,7 @@ class Client {
                     type: "subscribe",
                     to: jid
                 });
+
                 this.xmpp.send(subscribeResponse);
             } else if (stanza.attrs.type === "subscribed") {
                 console.log(`${jid} accepted your subscription request.`);

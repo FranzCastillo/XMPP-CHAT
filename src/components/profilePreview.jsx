@@ -1,13 +1,12 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import Menu from "../assets/menu";
 import User from "../assets/user";
 
 const ProfilePreview = ({username, onLogOut, onStatusChange, onAccDelete}) => {
-    const [status, setStatus] = useState("Available");
-    const [statusMessage, setStatusMessage] = useState("");
+    const [status, setStatus] = useState("Available");  // Stores the status
+    const [statusMessage, setStatusMessage] = useState("");  // Stores the status message
 
     useEffect(() => {
-        // Call onStatusChange every time status or statusMessage changes
         onStatusChange(status, statusMessage);
     }, [status, statusMessage, onStatusChange]);
 

@@ -5,26 +5,26 @@ import Client from "../utils/xmpp/client";
 import {useNavigate} from "react-router-dom";
 
 const Signup = () => {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
-    const [error, setError] = useState("");
+    const [username, setUsername] = useState("");  // Stores the username
+    const [password, setPassword] = useState("");  // Stores the password
+    const [confirmPassword, setConfirmPassword] = useState("");  // Stores the password confirmation
+    const [error, setError] = useState("");  // If an error occurs, this will be displayed
 
     const navigate = useNavigate();
 
-    const doNavigation = () => {
+    const doNavigation = () => {  // Redirects to the chat page
         navigate("/chat");
     }
 
-    const handleSubmit = (event) => {
+    const handleSubmit = (event) => {  // Handles the form submission
         event.preventDefault();
 
-        if (!username || !password || !confirmPassword) {
+        if (!username || !password || !confirmPassword) {  // If any field is empty, display an error
             setError("Please fill all fields");
             return;
         }
 
-        if (password !== confirmPassword) {
+        if (password !== confirmPassword) {  // If the passwords do not match, display an error
             setError("Passwords do not match");
             return;
         }
