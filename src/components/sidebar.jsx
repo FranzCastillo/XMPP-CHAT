@@ -113,7 +113,7 @@ const Sidebar = ({setDisplayedChat}) => {
                     username={Client.username}
                     onLogOut={() => Client.logout(doNavigationLogOut)}
                     onStatusChange={(status, message) => Client.changePresence(status, message)}
-                    onAccDelete={() => console.log("Deleting account")}  // TODO: Implement account deletion
+                    onAccDelete={() => Client.deleteAccount(doNavigationLogOut)}
                 />
             </div>
         </div>

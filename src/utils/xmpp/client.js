@@ -65,6 +65,36 @@ class Client {
         this._setupClient(doNavigation);
     }
 
+    async deleteAccount(doNavigation) {
+        if (this.xmpp) {
+            // Send the unregister request to delete the account
+            const deleteRequest = xml(
+                "iq",
+                {type: "set", id: "unregister_1", to: this.domain},
+                xml("query", {xmlns: "jabber:iq:register"},
+                    xml("remove")
+                )
+            );
+
+            await this.xmpp.send(deleteRequest);
+
+            this.xmpp.on("stanza", async (stanza) => {
+                if (stanza.is("iq") && stanza.attrs.id === "unregister_1") {
+                    if (stanza.attrs.type === "result") {
+                        console.log("Account deletion successful");
+
+                        // Log out after deleting the account
+                        await this.logout(doNavigation);
+                    } else if (stanza.attrs.type === "error") {
+                        console.error("Account deletion failed:", stanza.toString());
+                    }
+                }
+            });
+        }
+    }
+
+
+
     async logout(doNavigation) {
         if (this.xmpp) {
             // Send unavailable presence to indicate logout
@@ -72,6 +102,8 @@ class Client {
             this.xmpp.stop();
             this.xmpp = null;
 
+            doNavigation();
+        } else {
             doNavigation();
         }
     }
@@ -143,16 +175,6 @@ class Client {
                 )
             );
             await this.xmpp.send(presenceRequest);
-        }
-    }
-
-    async getPresenceMessage(jid) {
-        if (this.xmpp) {
-            const presenceProbe = xml(
-                "presence",
-                {type: "probe", to: jid}
-            );
-            await this.xmpp.send(presenceProbe);
         }
     }
 
