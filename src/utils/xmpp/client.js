@@ -25,6 +25,33 @@ class Client {
         }
     }
 
+    async signup(username, password, doNavigation) {
+        this.login("cas21562-root", "cas21562", async () => {
+            const registerRequest = xml(
+                "iq",
+                {type: "set", id: "register_1", to: this.domain},
+                xml("query", {xmlns: "jabber:iq:register"},
+                    xml("username", {}, username),
+                    xml("password", {}, password)
+                )
+            );
+
+            await this.xmpp.send(registerRequest);
+
+            this.xmpp.on("stanza", async (stanza) => {
+                if (stanza.is("iq") && stanza.attrs.id === "register_1") {
+                    if (stanza.attrs.type === "result") {
+                        console.log(`Registration successful for ${username}`);
+
+                        this.login(username, password, doNavigation);
+                    } else if (stanza.attrs.type === "error") {
+                        console.error("Registration failed:", stanza.toString());
+                    }
+                }
+            });
+        });
+    }
+
     login(username, password, doNavigation) {
         this.username = username;
         this.password = password;
@@ -234,7 +261,7 @@ class Client {
                 });
                 this.xmpp.send(subscribedResponse);
 
-                // Send a subscription request back to the contact if needed
+                // Send a subscription request back to the contact if not already sent
                 const subscribeResponse = xml("presence", {
                     type: "subscribe",
                     to: jid
@@ -263,6 +290,7 @@ class Client {
             }
         }
     }
+
 
     async onOnline(address, doNavigation) {
         if (doNavigation) {
